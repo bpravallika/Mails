@@ -1,0 +1,22 @@
+SELECT DISTINCT (recname) as RECNAME, auditrecname 
+FROM PSRECDEFN
+WHERE recname IN
+      (SELECT DISTINCT (recname)
+        FROM PSPNLFIELD
+        WHERE pnlname IN
+            (SELECT DISTINCT (b.pnlname)
+                FROM PSPNLGROUP a, PSPNLFIELD b
+                WHERE ( a.pnlname = b.pnlname OR a.pnlname =b.subpnlname)
+                  AND a.pnlgrpname in('D_PL_COMMENT_LIBRY','D_PL_PERSON_PLAN','D_PL_POSITION_PLAN')) -- specify your component name)
+                  AND RECNAME <> ' ')
+    UNION
+      (SELECT DISTINCT (recname)
+      FROM PSPNLFIELD
+      WHERE pnlname IN
+          (SELECT DISTINCT (b.subpnlname)
+              FROM PSPNLGROUP a,PSPNLFIELD b
+              WHERE (a.pnlname = b.pnlname OR a.pnlname = b.subpnlname )
+                AND a.pnlgrpname in('D_PL_COMMENT_LIBRY','D_PL_PERSON_PLAN','D_PL_POSITION_PLAN')) -- specify your component name)
+                AND RECNAME <> ' ')
+--AND rectype = '0' -- specify record type
+ORDER BY RECNAME ASC;
